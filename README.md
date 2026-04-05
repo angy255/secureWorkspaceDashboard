@@ -6,18 +6,26 @@ A full-stack web application for managing who inside a company can see and do wh
 
 ## Demo
 
+![Demo](./demo.gif)
 
+**Live:** [https://secure-workspace-dashboard.vercel.app](https://secure-workspace-dashboard.vercel.app)
 
 ---
 
-## Screenshots
+## Test Credentials
 
-Landing Page 
+```
+┌─────────────────────────────────────────────────────────┐
+│  Role     │  Email                         │  Password   │
+├───────────┼────────────────────────────────┼─────────────┤
+│  Admin    │  admin@example.com             │  password123│
+│  Manager  │  morgan.matthews@example.com   │  password123│
+│  Member   │  sam.foster@example.com        │  password123│
+│  Viewer   │  viewer.addison@example.com    │  password123│
+└─────────────────────────────────────────────────────────┘
+```
 
-Dashboard
-
-User Management
-
+The seed script creates **41 users total**: 1 admin · 5 managers · 15 members · 20 viewers.
 
 ---
 
@@ -150,7 +158,7 @@ These instructions assume you have **Node.js 18+** and **MySQL 8.0+** installed.
 ### Step 1 — Clone and install
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/angy255/secureWorkspaceDashboard.git
 cd secureWorkspaceDashboard
 
 cd backend && npm install
@@ -160,8 +168,8 @@ cd ../frontend && npm install
 ### Step 2 — Configure environment variables
 
 ```bash
-# From the project root
-cp .env.example backend/.env
+cd backend
+cp .env.example .env
 ```
 
 Open `backend/.env` and fill in your values. At minimum, set `DB_PASSWORD`, `JWT_SECRET`, and `JWT_REFRESH_SECRET`. Generate secrets with:
@@ -208,21 +216,20 @@ Navigate to [http://localhost:5173](http://localhost:5173) and click **Sign in**
 
 ## Environment Variables
 
-Copy `.env.example` to `backend/.env`. All variables below are required.
+Copy `backend/.env.example` to `backend/.env`. All variables below are required.
 
 | Variable | Example value | What it's for |
 |---|---|---|
 | `PORT` | `3001` | The port the Express server listens on |
 | `NODE_ENV` | `development` | Controls whether stack traces appear in error responses |
 | `DB_HOST` | `localhost` | Hostname of your MySQL server |
-| `DB_PORT` | `3306` | MySQL port (default is 3306) |
+| `DB_PORT` | `3306` | MySQL port (3306 locally; TiDB Cloud Serverless uses 4000) |
 | `DB_USER` | `root` | MySQL username |
 | `DB_PASSWORD` | `your_password` | MySQL password for the user above |
 | `DB_NAME` | `workspace_db` | The database name |
 | `JWT_SECRET` | _(64-char hex string)_ | Signs short-lived access tokens (15 min). Anyone with it can forge auth so keep it secret. |
 | `JWT_REFRESH_SECRET` | _(different 64-char hex string)_ | Signs long-lived refresh tokens (7 days). Must differ from `JWT_SECRET`. |
 | `FRONTEND_URL` | `http://localhost:5173` | The exact origin the backend will accept CORS requests from. No trailing slash. |
-| `VITE_API_URL` | `http://localhost:3001/api` | API base URL used by the frontend. In production, set this in your Vercel project settings. |
 
 ---
 
@@ -250,32 +257,29 @@ Copy `.env.example` to `backend/.env`. All variables below are required.
 
 ---
 
-## Test Credentials
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  Role     │  Email                         │  Password   │
-├───────────┼────────────────────────────────┼─────────────┤
-│  Admin    │  admin@example.com             │  password123│
-│  Manager  │  morgan.matthews@example.com   │  password123│
-│  Member   │  sam.foster@example.com        │  password123│
-│  Viewer   │  viewer.addison@example.com    │  password123│
-└─────────────────────────────────────────────────────────┘
-```
-
-The seed script creates **41 users total**: 1 admin · 5 managers · 15 members · 20 viewers.
-
----
-
 ## Deployment
 
 ### Backend — Render + TiDB Cloud
 
 - Create a free MySQL cluster at [tidbcloud.com](https://tidbcloud.com) (Serverless tier, no credit card required)
 - From the TiDB Cloud **Connect** panel, copy `DB_HOST`, `DB_PORT` (4000), `DB_USER`, and `DB_PASSWORD`
-- Run the migration against your TiDB cluster: `mysql -h <DB_HOST> -P 4000 -u <DB_USER> -p<DB_PASSWORD> <DB_NAME> --ssl-mode=REQUIRED < backend/src/db/migrations/001_schema.sql`
+- Run the migration, then seed in order (TiDB requires SSL and roles must exist before users):
+
+```bash
+# 1. Create tables
+mysql -u '<DB_USER>' -h '<DB_HOST>' -P 4000 --ssl-mode=REQUIRED -p'<DB_PASSWORD>' workspace_db < backend/src/db/migrations/001_schema.sql
+
+# 2. Seed roles, permissions, and organization
+mysql -u '<DB_USER>' -h '<DB_HOST>' -P 4000 --ssl-mode=REQUIRED -p'<DB_PASSWORD>' workspace_db < backend/src/db/seeds/seed.sql
+
+# 3. Seed 41 users (NODE_ENV=production enables SSL in db.ts)
+cd backend
+export DB_HOST=<DB_HOST> DB_PORT=4000 DB_USER=<DB_USER> DB_PASSWORD=<DB_PASSWORD> DB_NAME=workspace_db NODE_ENV=production
+npm run seed
+```
+
 - Create a new Web Service at [render.com](https://render.com), connect your GitHub repo, and set the root directory to `backend`
-- Build command: `npm install && npm run build` · Start command: `npm run start`
+- Build command: `npm install --include=dev && npm run build` · Start command: `npm run start`
 - Add all variables from `backend/.env.example` under **Environment** in the Render dashboard, including `NODE_ENV=production` and fresh `JWT_SECRET` / `JWT_REFRESH_SECRET` values
 - Leave `FRONTEND_URL` as a placeholder until Vercel deploys
 
