@@ -32,7 +32,7 @@ export function validate(schema: ZodSchema, source: RequestSource = 'body') {
     }
 
     // Replace with parsed data (unknown keys stripped by .strict())
-    (req as Record<string, unknown>)[source] = result.data;
+    (req as unknown as Record<string, unknown>)[source] = result.data;
     next();
   };
 }
