@@ -269,19 +269,21 @@ The seed script creates **41 users total**: 1 admin · 5 managers · 15 members 
 
 ## Deployment
 
-### Backend — Railway
+### Backend — Render + TiDB Cloud
 
-- Create a new project at [railway.app](https://railway.app), add your GitHub repo as a service, and set the root directory to `backend`
-- Add a **MySQL** plugin. Railway auto-populates the `DB_*` variables
-- Add `NODE_ENV=production`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, and `FRONTEND_URL` manually
-- Build command: `npm run build` · Start command: `npm start`
-- After first deploy, open a Railway shell and run `npm run db:reset` to create tables and seed data
+- Create a free MySQL cluster at [tidbcloud.com](https://tidbcloud.com) (Serverless tier, no credit card required)
+- From the TiDB Cloud **Connect** panel, copy `DB_HOST`, `DB_PORT` (4000), `DB_USER`, and `DB_PASSWORD`
+- Run the migration against your TiDB cluster: `mysql -h <DB_HOST> -P 4000 -u <DB_USER> -p<DB_PASSWORD> <DB_NAME> --ssl-mode=REQUIRED < backend/src/db/migrations/001_schema.sql`
+- Create a new Web Service at [render.com](https://render.com), connect your GitHub repo, and set the root directory to `backend`
+- Build command: `npm install && npm run build` · Start command: `npm run start`
+- Add all variables from `backend/.env.example` under **Environment** in the Render dashboard, including `NODE_ENV=production` and fresh `JWT_SECRET` / `JWT_REFRESH_SECRET` values
+- Leave `FRONTEND_URL` as a placeholder until Vercel deploys
 
 ### Frontend — Vercel
 
 - Import the repo at [vercel.com](https://vercel.com), set root directory to `frontend`, framework to `Vite`
-- Add env var: `VITE_API_URL=https://your-railway-backend.railway.app/api`
-- Deploy, then go back and update `FRONTEND_URL` in Railway to your Vercel URL and redeploy the backend
+- Add env var: `VITE_API_URL=https://your-render-service-name.onrender.com/api`
+- Deploy, then go back and update `FRONTEND_URL` in Render to your Vercel URL and redeploy the backend
 
 ---
 
