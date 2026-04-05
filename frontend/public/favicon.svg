@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Shield body -->
+  <path
+    d="M16 2L4 7v8c0 7.18 5.16 13.9 12 15.93C22.84 28.9 28 22.18 28 15V7L16 2Z"
+    fill="#8a9a7b"
+  />
+  <!-- Inner shield highlight -->
+  <path
+    d="M16 5L7 9.2V15c0 5.54 3.98 10.72 9 12.46V5Z"
+    fill="#9aaa8b"
+    opacity="0.35"
+  />
+  <!-- AA monogram -->
+  <text
+    x="16"
+    y="20"
+    text-anchor="middle"
+    font-family="Inter, system-ui, sans-serif"
+    font-size="10"
+    font-weight="700"
+    fill="white"
+    letter-spacing="-0.5"
+  >AA</text>
+</svg>

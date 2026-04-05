@@ -1,0 +1,41 @@
+{
+  "name": "workspace-dashboard-backend",
+  "version": "1.0.0",
+  "description": "Secure Workspace Dashboard — Express/TypeScript API",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "migrate": "mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD $DB_NAME < src/db/migrations/001_schema.sql",
+    "seed:static": "mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD $DB_NAME < src/db/seeds/seed.sql",
+    "seed": "ts-node --transpile-only src/db/seeds/seed.ts",
+    "db:reset": "npm run migrate && npm run seed:static && npm run seed",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.2.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.9.4",
+    "nodemailer": "^8.0.4",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.12.5",
+    "@types/nodemailer": "^8.0.0",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.4"
+  }
+}
